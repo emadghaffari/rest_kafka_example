@@ -28,14 +28,6 @@ var (
 )
 
 func init() {
-	// flag.StringVar(&group, "group", "go-kafka", "Kafka consumer group definition")
-	// flag.StringVar(&version, "version", "2.1.1", "Kafka cluster version")
-	// flag.StringVar(&topics, "topics", "first_topic", "Kafka topics to be consumed, as a comma separated list")
-	// flag.StringVar(&assignor, "assignor", "roundrobin", "Consumer group partition assignment strategy (range, roundrobin, sticky)")
-	// flag.BoolVar(&oldest, "oldest", true, "Kafka consumer consume initial offset from oldest")
-	// flag.BoolVar(&verbose, "verbose", false, "Sarama logging")
-	// flag.Parse()
-
 	if len(brokers) == 0 {
 		panic("no Kafka bootstrap brokers defined, please set the -brokers flag")
 	}
@@ -54,10 +46,9 @@ func init() {
 	config.Producer.Return.Successes = true
 	config.Producer.Return.Errors = true
 	config.Consumer.MaxProcessingTime = time.Second
-	// config.Producer.Idempotent = true
-	// config.Producer.Retry.Max = int(^uint(0)  >> 1)  
-	// config.Producer.Flush.MaxMessages = 5
-	// config.Producer.Flush.Bytes = int(32*1024)
+	config.Producer.Idempotent = true
+	config.Producer.RequiredAcks = sarama.WaitForAll
+	config.Net.MaxOpenRequests = 1
 	config.Producer.Compression = sarama.CompressionSnappy
 	switch assignor {
 	case "sticky":
