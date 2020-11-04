@@ -8,6 +8,7 @@ import (
 	"github.com/emadghaffari/res_errors/errors"
 	"github.com/emadghaffari/res_errors/logger"
 	"github.com/olivere/elastic"
+	"github.com/spf13/viper"
 )
 
 
@@ -33,8 +34,8 @@ type elasticsearchClient struct{
 func Init()  {
 	logger := logger.GetLogger()
 	client, err := elastic.NewClient(
-		elastic.SetURL("http://elasticsearch:9200"),
-		elastic.SetBasicAuth("elastic", "changeme"),
+		elastic.SetURL(viper.GetString("elastic.url")),
+		elastic.SetBasicAuth(viper.GetString("elastic.auth.username"), viper.GetString("elastic.auth.password")),
 		elastic.SetHealthcheckInterval(50*time.Second),
 		elastic.SetErrorLog(logger),
 		elastic.SetInfoLog(logger),

@@ -8,6 +8,7 @@ import (
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
 	"github.com/emadghaffari/res_errors/errors"
+	"github.com/spf13/viper"
 )
 
 
@@ -46,10 +47,10 @@ type StoreRequest struct{
 // Account func
 func init() () {
 	Account = credentials{
-		"6fDGzIprvMlythWICqP80nTCxe",
-		"efo40zCpxWNIGlFS6iXboDFfJWM9UlRsWJgLSTSkybybD6Gu3zm",
-		"1261387610834046976-FPHHF7nkyEGaqxNNfOpBVEXfkVNcXqa",
-		"ZgvIWz7GCtH7HwHYxQhpVE8vrYRS5vvXOooDX4JaaV144d",
+		viper.GetString("twitter.ConsumerKey"),
+		viper.GetString("twitter.ConsumerSecret"),
+		viper.GetString("twitter.AccessToken"),
+		viper.GetString("twitter.AccessTokenSecret"),
 	}
 }
 // GetClient is a helper function that will return a twitter client

@@ -2,13 +2,13 @@ package kafka
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/Shopify/sarama"
 	"github.com/emadghaffari/rest_kafka_example/model/elasticsearch"
+	"github.com/spf13/viper"
 )
 
 // Consumer struct
@@ -16,18 +16,28 @@ type Consumer struct {}
 
 // Sarama configuration options
 var (
-	brokers  = []string{"kafka1:9092","kafka2:9092"}
+	brokers  = []string{}
 	version  = ""
-	group    = "go-kafka"
-	topics   = []string{"first_topic"}
-	assignor = "roundrobin"
-	oldest   = true
+	group    = ""
+	topics   = []string{}
+	assignor = ""
+	oldest   = false
 	verbose  = false
-	Topic     = flag.String("topic", "first_topic", "The Kafka topic to use")
+	Topic    = ""
 	config *sarama.Config
 )
 
-func init() {
+// Init func
+func Init() {
+	brokers  = viper.GetStringSlice("kafka.brokers")
+	version  = viper.GetString("kafka.version")
+	group    = viper.GetString("kafka.group")
+	topics   = viper.GetStringSlice("kafka.topics")
+	assignor = viper.GetString("kafka.assignor")
+	oldest   = viper.GetBool("kafka.oldest")
+	verbose  = viper.GetBool("kafka.verbose")
+	Topic    = viper.GetString("kafka.Topic")
+
 	if len(brokers) == 0 {
 		panic("no Kafka bootstrap brokers defined, please set the -brokers flag")
 	}
@@ -82,7 +92,7 @@ func newConsumer() (sarama.ConsumerGroup, error) {
 		for err := range group.Errors() {
 		   panic(err)
 		}
-	 }()
+	}()
 
 	return group,nil
 }
@@ -113,13 +123,13 @@ func Producer(items []string)  {
 	syncProducer,_ := SyncProducer()
 	for _, item := range items {
 		_, _, err := syncProducer.SendMessage(&sarama.ProducerMessage{
-			Topic: *Topic,
+			Topic: Topic,
 			Value: sarama.StringEncoder(item),
 		})
 		time.Sleep(time.Millisecond * 10)
 	
 		if err != nil {
-			log.Fatalln("failed to send message to ", *Topic, err)
+			log.Fatalln("failed to send message to ", Topic, err)
 		}
 	}
 	
