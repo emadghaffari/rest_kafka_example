@@ -1,9 +1,8 @@
 package config
 
-
-var(
+var (
 	// KafkaConfig var
-	// manage configs for kafka 
+	// manage configs for kafka
 	KafkaConfig kafkaInterface = &kafka{}
 )
 

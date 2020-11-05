@@ -9,18 +9,18 @@ import (
 
 // Search func
 func Search(text string) error {
-	client,err := Account.GetClient()
+	client, err := Account.GetClient()
 	if err != nil {
 		return err
 	}
 
-	result,err := Account.Search(client,text)
+	result, err := Account.Search(client, text)
 	if err != nil {
 		return err
 	}
 	var items []string
 	for _, item := range result.Statuses {
-		res,_ := json.Marshal(item.User)
+		res, _ := json.Marshal(item.User)
 		items = append(items, string(res))
 	}
 	kafka.Producer(items)
@@ -29,14 +29,14 @@ func Search(text string) error {
 
 // Store func
 func Store(request StoreRequest) (*twitter.Tweet, error) {
-	client,err := Account.GetClient()
+	client, err := Account.GetClient()
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
-	result,_,err := Account.NewTweet(client,request.Text,nil)
+	result, _, err := Account.NewTweet(client, request.Text, nil)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	kafka.Producer([]string{result.Text})
-	return result,nil
+	return result, nil
 }

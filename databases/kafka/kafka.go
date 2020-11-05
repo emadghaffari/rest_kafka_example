@@ -12,7 +12,7 @@ import (
 )
 
 // Consumer struct
-type Consumer struct {}
+type Consumer struct{}
 
 // Sarama configuration options
 var (
@@ -24,19 +24,19 @@ var (
 	oldest   = false
 	verbose  = false
 	Topic    = ""
-	config *sarama.Config
+	config   *sarama.Config
 )
 
 // Init func
 func Init() {
-	brokers  = viper.GetStringSlice("kafka.brokers")
-	version  = viper.GetString("kafka.version")
-	group    = viper.GetString("kafka.group")
-	topics   = viper.GetStringSlice("kafka.topics")
+	brokers = viper.GetStringSlice("kafka.brokers")
+	version = viper.GetString("kafka.version")
+	group = viper.GetString("kafka.group")
+	topics = viper.GetStringSlice("kafka.topics")
 	assignor = viper.GetString("kafka.assignor")
-	oldest   = viper.GetBool("kafka.oldest")
-	verbose  = viper.GetBool("kafka.verbose")
-	Topic    = viper.GetString("kafka.Topic")
+	oldest = viper.GetBool("kafka.oldest")
+	verbose = viper.GetBool("kafka.verbose")
+	Topic = viper.GetString("kafka.Topic")
 
 	if len(brokers) == 0 {
 		panic("no Kafka bootstrap brokers defined, please set the -brokers flag")
@@ -51,7 +51,7 @@ func Init() {
 	}
 
 	config = sarama.NewConfig()
-	config.ClientID = "go-kafka"	
+	config.ClientID = "go-kafka"
 	config.Consumer.Return.Errors = true
 	config.Producer.Return.Successes = true
 	config.Producer.Return.Errors = true
@@ -70,12 +70,12 @@ func Init() {
 	default:
 		log.Panicf("Unrecognized consumer group partition assignor: %s", assignor)
 	}
-	
+
 }
 
 // SyncProducer func
 func SyncProducer() (sarama.SyncProducer, error) {
-	syncProducer,proErr := sarama.NewSyncProducer(brokers,config)
+	syncProducer, proErr := sarama.NewSyncProducer(brokers, config)
 	if proErr != nil {
 		panic(proErr)
 	}
@@ -90,16 +90,16 @@ func newConsumer() (sarama.ConsumerGroup, error) {
 	}
 	go func() {
 		for err := range group.Errors() {
-		   panic(err)
+			panic(err)
 		}
 	}()
 
-	return group,nil
+	return group, nil
 }
 
 // Consumer func
-func (c *Consumer) Consumer()  {
-	group,_ := newConsumer()
+func (c *Consumer) Consumer() {
+	group, _ := newConsumer()
 
 	defer func() {
 		if err := group.Close(); err != nil {
@@ -110,29 +110,30 @@ func (c *Consumer) Consumer()  {
 	func() {
 		ctx := context.Background()
 		for {
-		   err := group.Consume(ctx, topics, c)
-		   if err != nil {
-			  fmt.Printf("kafka consume failed: %v, sleeping and retry in a moment\n", err)
-			  time.Sleep(time.Second)
-		   }
+			err := group.Consume(ctx, topics, c)
+			if err != nil {
+				fmt.Printf("kafka consume failed: %v, sleeping and retry in a moment\n", err)
+				time.Sleep(time.Second)
+			}
 		}
-	 }()
+	}()
 }
+
 // Producer func
-func Producer(items []string)  {
-	syncProducer,_ := SyncProducer()
+func Producer(items []string) {
+	syncProducer, _ := SyncProducer()
 	for _, item := range items {
 		_, _, err := syncProducer.SendMessage(&sarama.ProducerMessage{
 			Topic: Topic,
 			Value: sarama.StringEncoder(item),
 		})
 		time.Sleep(time.Millisecond * 10)
-	
+
 		if err != nil {
 			log.Fatalln("failed to send message to ", Topic, err)
 		}
 	}
-	
+
 	_ = syncProducer.Close()
 }
 
@@ -140,21 +141,21 @@ func Producer(items []string)  {
 func (c *Consumer) Setup(_ sarama.ConsumerGroupSession) error {
 	fmt.Println("*********************Setup*******************")
 	return nil
- }
- 
+}
+
 // Cleanup meth
- func (c *Consumer) Cleanup(_ sarama.ConsumerGroupSession) error {
+func (c *Consumer) Cleanup(_ sarama.ConsumerGroupSession) error {
 	fmt.Println("*********************Cleanup*******************")
 	return nil
- }
- 
+}
+
 // ConsumeClaim meth
- func (c *Consumer) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+func (c *Consumer) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	fmt.Println("*********************ConsumeClaim*******************")
 
 	for msg := range claim.Messages() {
-		id := fmt.Sprintf("%v-%d-%d",msg.Topic,msg.Partition,msg.Offset)
+		id := fmt.Sprintf("%v-%d-%d", msg.Topic, msg.Partition, msg.Offset)
 		go elasticsearch.Save(id, string(msg.Value))
 	}
 	return nil
- }
+}

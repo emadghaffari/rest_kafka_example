@@ -9,23 +9,23 @@ import (
 )
 
 // Search func
-func Search(text string) (error) {
+func Search(text string) error {
 	text = strings.TrimSpace(text)
-	if text == ""{
+	if text == "" {
 		return errors.HandlerBadRequest("invalid text")
 	}
 	return twitterModel.Search(text)
 }
 
 // Store func
-func Store(request twitterModel.StoreRequest) (*twitter.Tweet ,error) {
+func Store(request twitterModel.StoreRequest) (*twitter.Tweet, error) {
 	request.Text = strings.TrimSpace(request.Text)
-	if request.Text == ""{
+	if request.Text == "" {
 		return nil, errors.HandlerBadRequest("invalid text")
 	}
-	result,err := twitterModel.Store(request)
+	result, err := twitterModel.Store(request)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
-	return result,nil 
+	return result, nil
 }

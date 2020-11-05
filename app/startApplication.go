@@ -12,10 +12,9 @@ var (
 	router = gin.Default()
 )
 
-func init()  {
+func init() {
 	gin.SetMode(viper.GetString("gin.mode"))
 }
-
 
 // StartApplication func
 func StartApplication() {

@@ -16,8 +16,8 @@ const (
 
 // Save method
 // store new item
-func Save(id string,i interface{}) errors.ResError {
-	_, err := elasticsearch.Client.Index(id,indexES, docType, i)
+func Save(id string, i interface{}) errors.ResError {
+	_, err := elasticsearch.Client.Index(id, indexES, docType, i)
 	if err != nil {
 		return err
 	}
@@ -26,25 +26,25 @@ func Save(id string,i interface{}) errors.ResError {
 
 // Get func
 // get item with id
-func Get(i string) (interface{},errors.ResError) {
+func Get(i string) (interface{}, errors.ResError) {
 	result, err := elasticsearch.Client.Get(indexES, docType, i)
 	if err != nil {
 		if strings.Contains(err.Error(), "404") {
-			return nil,errors.HandlerNotFoundError(fmt.Sprintf("item not found %s", i))
+			return nil, errors.HandlerNotFoundError(fmt.Sprintf("item not found %s", i))
 		}
-		return nil,err
+		return nil, err
 	}
 	if !result.Found {
-		return nil,errors.HandlerNotFoundError(fmt.Sprintf("item not found %s", i))
+		return nil, errors.HandlerNotFoundError(fmt.Sprintf("item not found %s", i))
 	}
 
 	bytes, marshalErr := result.Source.MarshalJSON()
 	if marshalErr != nil {
-		return nil,errors.HandlerInternalServerError(fmt.Sprintf("error in MarshalJSON from DB %s", i), err)
+		return nil, errors.HandlerInternalServerError(fmt.Sprintf("error in MarshalJSON from DB %s", i), err)
 	}
 	var unmarshaled interface{}
 	if err := json.Unmarshal(bytes, &unmarshaled); err != nil {
-		return nil,errors.HandlerInternalServerError(fmt.Sprintf("error in unmarshal data %s", i), err)
+		return nil, errors.HandlerInternalServerError(fmt.Sprintf("error in unmarshal data %s", i), err)
 	}
 	return unmarshaled, nil
 }

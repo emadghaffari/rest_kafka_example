@@ -7,8 +7,8 @@ import (
 
 // Save method
 // store new item
-func Save(id string,i interface{}) errors.ResError {
-	err := elasticsearch.Save(id,i)
+func Save(id string, i interface{}) errors.ResError {
+	err := elasticsearch.Save(id, i)
 	if err != nil {
 		return err
 	}
