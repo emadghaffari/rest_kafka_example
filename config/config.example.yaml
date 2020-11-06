@@ -1,3 +1,4 @@
+Environment: Test
 gin:
     mode: debug
     port: ":8080"
