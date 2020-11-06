@@ -2,6 +2,7 @@ package app
 
 import (
 	"github.com/emadghaffari/res_errors/logger"
+	"github.com/emadghaffari/rest_kafka_example/config"
 	"github.com/emadghaffari/rest_kafka_example/databases/elasticsearch"
 	"github.com/emadghaffari/rest_kafka_example/databases/kafka"
 	"github.com/gin-gonic/gin"
@@ -18,6 +19,8 @@ func init() {
 
 // StartApplication func
 func StartApplication() {
+	config.Viper.Configs()
+	config.Logrus.Configs()
 	elasticsearch.Init()
 	kafka.Init()
 	consumer := kafka.Consumer{}

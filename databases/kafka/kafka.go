@@ -49,7 +49,6 @@ func Init() {
 	if len(group) == 0 {
 		panic("no Kafka consumer group defined, please set the -group flag")
 	}
-
 	config = sarama.NewConfig()
 	config.ClientID = "go-kafka"
 	config.Consumer.Return.Errors = true
@@ -60,6 +59,12 @@ func Init() {
 	config.Producer.RequiredAcks = sarama.WaitForAll
 	config.Net.MaxOpenRequests = 1
 	config.Producer.Compression = sarama.CompressionSnappy
+	config.Producer.RequiredAcks = sarama.WaitForAll
+	config.Producer.Return.Successes = true
+	config.Producer.Retry.Backoff = time.Duration(time.Second * 5)
+	config.Producer.Retry.Max = 5
+	config.Producer.Compression = sarama.CompressionLZ4
+	config.Producer.Timeout = time.Duration(time.Second * 50)
 	switch assignor {
 	case "sticky":
 		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategySticky
