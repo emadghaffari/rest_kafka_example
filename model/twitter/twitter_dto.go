@@ -2,8 +2,9 @@ package twitter
 
 import (
 	"fmt"
-	"log"
 	"net/http"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/dghubble/go-twitter/twitter"
 	"github.com/dghubble/oauth1"
@@ -17,6 +18,7 @@ var (
 )
 
 type credentialsInterface interface {
+	Init()
 	GetClient() (*twitter.Client, error)
 	Search(client *twitter.Client, query string) (*twitter.Search, error)
 	NewTweet(client *twitter.Client, text string, params *twitter.StatusUpdateParams) (*twitter.Tweet, *http.Response, error)
@@ -35,6 +37,7 @@ type credentials struct {
 // SearchRequest struct
 type SearchRequest struct {
 	Request string `'json:"request"`
+	Type    string `'json:"type"`
 }
 
 // StoreRequest struct
@@ -43,14 +46,12 @@ type StoreRequest struct {
 	Title string `'json:"title"`
 }
 
-// Account func
-func init() {
-	Account = credentials{
-		viper.GetString("twitter.consumerKey"),
-		viper.GetString("twitter.consumerSecret"),
-		viper.GetString("twitter.accessToken"),
-		viper.GetString("twitter.accessTokenSecret"),
-	}
+// Init func
+func (creds *credentials) Init() {
+	creds.ConsumerKey = viper.GetString("twitter.consumerKey")
+	creds.ConsumerSecret = viper.GetString("twitter.consumerSecret")
+	creds.AccessToken = viper.GetString("twitter.accessToken")
+	creds.AccessTokenSecret = viper.GetString("twitter.accessTokenSecret")
 }
 
 // GetClient is a helper function that will return a twitter client
@@ -77,7 +78,9 @@ func (creds credentials) GetClient() (*twitter.Client, error) {
 	// we have used successfully allow us to log in!
 	_, _, err := client.Accounts.VerifyCredentials(verifyParams)
 	if err != nil {
-
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Warn("twitter: 215 Bad Authentication data")
 		return nil, err
 	}
 
@@ -89,15 +92,19 @@ func (creds credentials) Search(client *twitter.Client, query string) (*twitter.
 	search, hresp, err := client.Search.Tweets(
 		&twitter.SearchTweetParams{
 			Query: query,
-			Lang:  "en",
-			Count: 500,
 		},
 	)
 
 	if err != nil {
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Warn("internal search error")
 		return nil, errors.HandlerBadRequest("Error in Search Tweet Params")
 	}
 	if hresp.StatusCode != http.StatusOK {
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Warn("Error in http request for search twitter")
 		return nil, errors.HandlerInternalServerError(fmt.Sprintf("Error in http request for search: %v", hresp), nil)
 	}
 

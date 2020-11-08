@@ -20,7 +20,7 @@ func Search(c *gin.Context) {
 	}
 	err := twitter.Search(request.Request)
 	if err != nil {
-		resErr := errors.HandlerInternalServerError("internal search Error", err)
+		resErr := errors.HandlerInternalServerError(fmt.Sprintf("internal search Error: %s", err), err)
 		c.JSON(resErr.Status(), resErr.Message())
 		return
 	}

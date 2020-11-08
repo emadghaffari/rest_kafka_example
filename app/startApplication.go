@@ -5,6 +5,7 @@ import (
 	"github.com/emadghaffari/rest_kafka_example/config"
 	"github.com/emadghaffari/rest_kafka_example/databases/elasticsearch"
 	"github.com/emadghaffari/rest_kafka_example/databases/kafka"
+	"github.com/emadghaffari/rest_kafka_example/model/twitter"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
 )
@@ -23,6 +24,7 @@ func StartApplication() {
 	config.Logrus.Configs()
 	elasticsearch.Init()
 	kafka.Init()
+	twitter.Account.Init()
 	consumer := kafka.Consumer{}
 	go consumer.Consumer()
 	mapURL()

@@ -105,20 +105,18 @@ func newConsumer() (sarama.ConsumerGroup, error) {
 // Consumer func
 func (c *Consumer) Consumer() {
 	group, _ := newConsumer()
-
 	defer func() {
 		if err := group.Close(); err != nil {
 			panic(err)
 		}
 	}()
-
 	func() {
 		ctx := context.Background()
 		for {
 			err := group.Consume(ctx, topics, c)
 			if err != nil {
 				fmt.Printf("kafka consume failed: %v, sleeping and retry in a moment\n", err)
-				time.Sleep(time.Second)
+				time.Sleep(time.Millisecond * 100)
 			}
 		}
 	}()
