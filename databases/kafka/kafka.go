@@ -59,22 +59,31 @@ func Init() {
 	config.Producer.RequiredAcks = sarama.WaitForAll
 	config.Net.MaxOpenRequests = 1
 	config.Producer.Compression = sarama.CompressionSnappy
-	config.Producer.RequiredAcks = sarama.WaitForAll
 	config.Producer.Return.Successes = true
 	config.Producer.Retry.Backoff = time.Duration(time.Second * 5)
 	config.Producer.Retry.Max = 5
 	config.Producer.Compression = sarama.CompressionLZ4
 	config.Producer.Timeout = time.Duration(time.Second * 50)
-	switch assignor {
-	case "sticky":
-		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategySticky
-	case "roundrobin":
-		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
-	case "range":
-		config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
-	default:
-		log.Panicf("Unrecognized consumer group partition assignor: %s", assignor)
-	}
+	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+
+	// Auth
+	config.Net.SASL.Enable = true
+	config.Net.SASL.Handshake = true
+	config.Net.SASL.Mechanism = sarama.SASLTypeSCRAMSHA512
+	config.Net.SASL.User = "admin"
+	config.Net.SASL.Password = "admin-secret"
+	config.Net.SASL.SCRAMClientGeneratorFunc = func() sarama.SCRAMClient { return &XDGSCRAMClient{HashGeneratorFcn: SHA512} }
+
+	// switch assignor {
+	// case "sticky":
+	// 	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategySticky
+	// case "roundrobin":
+	// 	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRoundRobin
+	// case "range":
+	// 	config.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+	// default:
+	// 	log.Panicf("Unrecognized consumer group partition assignor: %s", assignor)
+	// }
 
 }
 
