@@ -18,7 +18,7 @@ func Search(c *gin.Context) {
 		c.JSON(resErr.Status(), resErr.Message())
 		return
 	}
-	err := twitter.Search(request.Request)
+	err := twitter.TwitterService.Search(request.Request)
 	if err != nil {
 		resErr := errors.HandlerInternalServerError(fmt.Sprintf("internal search Error: %s", err), err)
 		c.JSON(resErr.Status(), resErr.Message())
@@ -36,7 +36,7 @@ func Store(c *gin.Context) {
 		return
 	}
 
-	result, err := twitter.Store(request)
+	result, err := twitter.TwitterService.Store(request)
 	if err != nil {
 		fmt.Println(err)
 	}
